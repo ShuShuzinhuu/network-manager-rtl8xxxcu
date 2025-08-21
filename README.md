@@ -1,4 +1,4 @@
-# rtl8xxxcu-eu-wlan-manager
+# wlan network-manager-rtl8xxxcu
 
 **Wi-Fi Manager** for **USB RTL8XXXCU/GU adapters**.  
 This tool simplifies manual Wi-Fi connections on cheap USB adapters (like the ones sold on AliExpress), by blocking `NetworkManager` from managing `wlan0` and handling connections manually using **iw, wpa_supplicant, and dhclient**.
