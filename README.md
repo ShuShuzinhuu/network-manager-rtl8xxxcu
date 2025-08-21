@@ -7,6 +7,13 @@ This tool simplifies manual Wi-Fi connections on cheap USB adapters (like the on
 > (with a little help from ChatGPT 😉)
 
 ---
+## ⚠️ Alert
+
+* Must run as root (`sudo`) to enable/disable NM and use wpa\_supplicant
+* Tested primarily with USB RTL8188GU adapters
+* Hidden SSIDs are ignored
+* NetworkManager must be installed for enable/disable functionality
+* For issues, check `dmesg` or run `nmcli device status`
 
 ## ✨ Features
 
@@ -75,11 +82,5 @@ sudo python3 main.py
 
 ---
 
-## Notes
 
-* Must run as root (`sudo`) to enable/disable NM and use wpa\_supplicant
-* Tested primarily with USB RTL8188GU adapters
-* Hidden SSIDs are ignored
-* NetworkManager must be installed for enable/disable functionality
-* For issues, check `dmesg` or run `nmcli device status`
 
