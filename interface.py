@@ -1,3 +1,4 @@
+import subprocess
 import os
 from scanner import scan_networks
 from connector import connect, disconnect
@@ -41,10 +42,11 @@ def terminal_menu():
         print(f"{YELLOW}1.{RESET} Scan networks")
         print(f"{YELLOW}2.{RESET} Connect")
         print(f"{YELLOW}3.{RESET} Disconnect")
-        print(f"{YELLOW}4.{RESET} Enable NetworkManager for wlan0")
-        print(f"{YELLOW}5.{RESET} Disable NetworkManager for wlan0")
-        print(f"{YELLOW}6.{RESET} Status NetworkManager")
-        print(f"{YELLOW}7.{RESET} Exit\n")
+        print(f"{YELLOW}4.{RESET} Release DHCP (Wlan0 connected but no internet)")
+        print(f"{YELLOW}5.{RESET} Enable NetworkManager for wlan0")
+        print(f"{YELLOW}6.{RESET} Disable NetworkManager for wlan0")
+        print(f"{YELLOW}7.{RESET} Status NetworkManager")
+        print(f"{YELLOW}8.{RESET} Exit\n")
 
         choice = input(f"{GREEN}Choose an option: {RESET}")
 
@@ -69,18 +71,23 @@ def terminal_menu():
             input("\nPress ENTER to return...")
 
         elif choice == "4":
+            subprocess.run(["dhclient", "wlan0"], check=True)
+            print(f"{GREEN}✅ DHCP released on wlan0{RESET}")
+            input("Press ENTER to return...")
+
+        elif choice == "5":
             enable_nm()
             input("\nPress ENTER to return...")
 
-        elif choice == "5":
+        elif choice == "6":
             disable_nm()
             input("\nPress ENTER to return...")
 
-        elif choice == "6":
+        elif choice == "7":
             print(status_nm())
             input("\nPress ENTER to return...")
 
-        elif choice == "7":
+        elif choice == "8":
             print(f"{CYAN}Exiting...{RESET}")
             break
 
