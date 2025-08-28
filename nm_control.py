@@ -20,31 +20,45 @@ def run_cmd(cmd: list) -> str:
         return e.stderr.strip()
 
 def disable_nm():
-    """Disable NetworkManager management for wlan0."""
+    """Restart NetworkManager and leave wlan0 as UNMANAGED."""
     check_root()
     content = "[keyfile]\nunmanaged-devices=interface-name:wlan0\n"
     try:
         with open(CONF_PATH, "w") as f:
             f.write(content)
 
+        print("⏳ Restarting NetworkManager and leaving wlan0 unmanaged...")
+
         run_cmd(["nmcli", "device", "set", DEVICE, "managed", "no"])
-        subprocess.run(["systemctl", "restart", "NetworkManager"], check=True)
+
+        subprocess.run(["systemctl", "stop", "NetworkManager"], check=True)
+        time.sleep(1)
+        subprocess.run(["systemctl", "start", "NetworkManager"], check=True)
         time.sleep(2)
-        print("✅ NetworkManager set to NOT manage wlan0.")
+
+        run_cmd(["nmcli", "device", "set", DEVICE, "managed", "no"])
+
+        print("✅ NetworkManager restarted and wlan0 remains UNMANAGED.")
     except Exception as e:
         print(f"❌ Error disabling NM: {e}")
 
 def enable_nm():
-    """Enable NetworkManager management for wlan0."""
+    """Enable NetworkManager management for wlan0 normally."""
     check_root()
     try:
         if os.path.exists(CONF_PATH):
             os.remove(CONF_PATH)
 
+        print("⏳ Enabling wlan0 management...")
+
         run_cmd(["nmcli", "device", "set", DEVICE, "managed", "yes"])
-        subprocess.run(["systemctl", "restart", "NetworkManager"], check=True)
+
+        subprocess.run(["systemctl", "stop", "NetworkManager"], check=True)
+        time.sleep(1)
+        subprocess.run(["systemctl", "start", "NetworkManager"], check=True)
         time.sleep(2)
-        print("✅ NetworkManager set to manage wlan0.")
+
+        print("✅ NetworkManager is now managing wlan0.")
     except Exception as e:
         print(f"❌ Error enabling NM: {e}")
 
@@ -58,3 +72,33 @@ def status_nm() -> str:
             else:
                 return "🔴 wlan0 is MANAGED by NetworkManager!"
     return "⚪ wlan0 not found. Check your adapter."
+
+def restart_network_control():
+    """Restart NetworkManager, disconnect any active network, and leave wlan0 UNMANAGED."""
+    check_root()
+    print("⏳ Disconnecting active network and restarting NetworkManager...")
+
+    try:
+        # Kill any wpa_supplicant sessions
+        subprocess.run(["pkill", "-f", "wpa_supplicant"], check=False)
+        # Release DHCP lease
+        subprocess.run(["dhclient", "-r", DEVICE], check=False)
+
+        # Restart NetworkManager
+        subprocess.run(["systemctl", "stop", "NetworkManager"], check=True)
+        time.sleep(1)
+        subprocess.run(["systemctl", "start", "NetworkManager"], check=True)
+        time.sleep(2)
+
+        # Disconnect wlan0 from any network
+        run_cmd(["nmcli", "device", "disconnect", DEVICE])
+        # Ensure wlan0 unmanaged
+        run_cmd(["nmcli", "device", "set", DEVICE, "managed", "no"])
+
+        # Write config to persist unmanaged
+        with open(CONF_PATH, "w") as f:
+            f.write("[keyfile]\nunmanaged-devices=interface-name:wlan0\n")
+
+        print("✅ NetworkManager restarted. wlan0 is UNMANAGED and disconnected from all networks.")
+    except Exception as e:
+        print(f"❌ Error restarting NetworkManager: {e}")
