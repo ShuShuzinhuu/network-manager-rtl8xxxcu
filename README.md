@@ -150,5 +150,3 @@ Open an issue or send a pull request. Please include logs or `dmesg` output when
 License: **MIT**.
 
 Authors: ShuShuzinhuu & mactavish011.
-
-(Repository adapted for Arch Linux usage.)
